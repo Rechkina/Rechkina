@@ -66,6 +66,7 @@
         { id: "roof_proflist_low", name: "Кровля: Профлист С8 цветной низкая крыша (+500 р/м²)", price: 500, type: "area", quantity: 0 },
         { id: "roof_proflist_high", name: "Кровля: Профлист С8 цветной высокая крыша (+750 р/м²)", price: 750, type: "area", quantity: 0 },
         { id: "frame_upgrade", name: "Замена каркаса 50/100 на 50/150", price: 2000, type: "area", quantity: 0 },
+        { id: "frame_kamera_dry", name: "Каркас \"камерная\" сушка (+5 500 р/м²)", price: 5500, type: "area", quantity: 0 },
         { id: "vent_gap", name: "Вентзазор (периметр * 2000 р)", price: 2000, type: "area", quantity: 0 },
         { id: "roof_overhangs", name: "Свесы на кровле до 30 см (периметр * 1200 р)", price: 1200, type: "area", quantity: 0 },
 
@@ -879,7 +880,12 @@
                 if (!isHouse) return;
             }
 
-            // Frame upgrade (50/100 -> 50/150) is only relevant without insulation
+            // Frame kiln-dried lumber option is only for houses (high/low roof)
+            if (add.id === 'frame_kamera_dry') {
+                if (!isHouse) return;
+            }
+
+
             if (add.id === 'frame_upgrade') {
                 if (state.calculatorMode === 'custom') {
                     const hasInsulation =
@@ -991,7 +997,7 @@
                 } else if (nameLower.includes('периметр') || nameLower.includes('вентзазор') || nameLower.includes('свес') || nameLower.includes('обвязк')) {
                     recQty = Math.ceil(calcPerimeter);
                     recText = `Периметр: ${recQty} м`;
-                } else if (add.id === 'frame_upgrade') {
+                } else if (add.id === 'frame_upgrade' || add.id === 'frame_kamera_dry') {
                     recQty = Math.ceil(area + getVerandaArea());
                     recText = `Площадь: ${recQty} м²`;
                 } else {
