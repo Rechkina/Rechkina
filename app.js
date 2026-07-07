@@ -3,12 +3,14 @@
 (function () {
     // 1. Data & State Initialization
     const SHARED_ADDITIONS = [
-        { id: "win_lux_50_50_p", name: "Окно ПВХ 1-камерный 50х50 поворотное", price: 5500, type: "quantity", quantity: 0 },       
+        { id: "win_lux_50_50_p", name: "Окно ПВХ 1-камерный 50х50 поворотное", price: 5500, type: "quantity", quantity: 0 },
+        { id: "win_lux_50_50_po2", name: "Окно ПВХ 50х50 (2 камеры) поворотно-откидное", price: 9000, type: "quantity", quantity: 0 },
         { id: "win_lux_60_90_po", name: "Окно ПВХ 1-камерный 60х90 поворотно-откидное", price: 7500, type: "quantity", quantity: 0 },
         { id: "win_lux_60_120_po", name: "Окно ПВХ 1-камерный 60х120 поворотно-откидное", price: 10000, type: "quantity", quantity: 0 },
         { id: "win_lux_60_180_po", name: "Окно ПВХ 1-камерный 60х180 поворотно-откидное", price: 12000, type: "quantity", quantity: 0 },
         { id: "win_lux_100_100_po", name: "Окно ПВХ 1-камерный 100х100 поворотно-откидное", price: 9000, type: "quantity", quantity: 0 },
         { id: "win_lux_100_120_po1", name: "Окно ПВХ 1-камерный 100х120 поворотно-откидное", price: 11000, type: "quantity", quantity: 0 },
+        { id: "win_lux_100_120_po2", name: "Окно ПВХ 100х120 (2 камеры) поворотно-откидное", price: 14000, type: "quantity", quantity: 0 },
         { id: "win_lux_120_120_po", name: "Окно ПВХ 1-камерный 120х120 поворотно-откидное", price: 13000, type: "quantity", quantity: 0 },
         { id: "win_lux_100_140_po", name: "Окно ПВХ 1-камерный 100х140 поворотно-откидное", price: 14000, type: "quantity", quantity: 0 },
         { id: "win_lux_100_150_po", name: "Окно ПВХ 1-камерный 100х150 поворотно-откидное", price: 15000, type: "quantity", quantity: 0 },
@@ -20,12 +22,10 @@
         { id: "win_lux_180_190_po", name: "Окно ПВХ 1-камерный 180х190 поворотно-откидное", price: 26000, type: "quantity", quantity: 0 },
         { id: "win_lux_180_200_po", name: "Окно ПВХ 1-камерный 180х200 поворотно-откидное", price: 30000, type: "quantity", quantity: 0 },
 
-        { id: "win_lux_50_50_po2", name: "Окно ПВХ 50х50 (2 камеры) поворотно-откидное", price: 9000, type: "quantity", quantity: 0 },
         { id: "win_lux_60_90_po2", name: "Окно ПВХ 60х90 (2 камеры) поворотно-откидное", price: 10500, type: "quantity", quantity: 0 },
         { id: "win_lux_60_120_po2", name: "Окно ПВХ 60х120 (2 камеры) поворотно-откидное", price: 13000, type: "quantity", quantity: 0 },
         { id: "win_lux_60_180_po2", name: "Окно ПВХ 60х180 (2 камеры) поворотно-откидное", price: 15000, type: "quantity", quantity: 0 },
         { id: "win_lux_100_100_po2", name: "Окно ПВХ 100х100 (2 камеры) поворотно-откидное", price: 12000, type: "quantity", quantity: 0 },
-        { id: "win_lux_100_120_po2", name: "Окно ПВХ 100х120 (2 камеры) поворотно-откидное", price: 14000, type: "quantity", quantity: 0 },
         { id: "win_lux_120_120_po2", name: "Окно ПВХ 120х120 (2 камеры) поворотно-откидное", price: 16000, type: "quantity", quantity: 0 },
         { id: "win_lux_100_140_po2", name: "Окно ПВХ 100х140 (2 камеры) поворотно-откидное", price: 17000, type: "quantity", quantity: 0 },
         { id: "win_lux_100_150_po2", name: "Окно ПВХ 100х150 (2 камеры) поворотно-откидное", price: 18000, type: "quantity", quantity: 0 },
@@ -1030,7 +1030,9 @@
                 } else if (nameLower.includes('периметр') || nameLower.includes('вентзазор') || nameLower.includes('свес') || nameLower.includes('обвязк')) {
                     recQty = Math.ceil(calcPerimeter);
                     recText = `Периметр: ${recQty} м`;
-                } else if (add.id === 'frame_upgrade' || add.id === 'frame_kamera_dry' || add.id === 'ceiling_osb_12_lath') {
+                } else if (add.id === 'frame_upgrade' || add.id === 'frame_kamera_dry' || add.id === 'ceiling_osb_12_lath'
+                           || add.id === 'antiseptic_lag' || add.id === 'floor_tongue_28_add' || add.id === 'floor_board_35_150_add'
+                           || add.id === 'roof_metal' || add.id === 'roof_proflist_low' || add.id === 'roof_proflist_high') {
                     recQty = Math.ceil(area + getVerandaArea());
                     recText = `Площадь: ${recQty} м²`;
                 } else {
