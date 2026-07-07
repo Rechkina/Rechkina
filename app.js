@@ -956,6 +956,11 @@
                 }
             }
 
+            // Text search filter (by name)
+            if (additionSearchQuery && !add.name.toLowerCase().includes(additionSearchQuery)) {
+                return;
+            }
+
             const qty = state.additionQuantities[add.id] || 0;
             const price = (add.id === 'frame_upgrade') ? getFrameUpgradePrice() : (add.price || 0);
             
@@ -1036,9 +1041,12 @@
                 } else if (nameLower.includes('периметр') || nameLower.includes('вентзазор') || nameLower.includes('свес') || nameLower.includes('обвязк')) {
                     recQty = Math.ceil(calcPerimeter);
                     recText = `Периметр: ${recQty} м`;
+                } else if (add.id === 'roof_metal' || add.id === 'roof_proflist_low' || add.id === 'roof_proflist_high') {
+                    const porchArea = state.additionQuantities['freestanding_porch'] || 0;
+                    recQty = Math.ceil(area + getVerandaArea() + porchArea);
+                    recText = `Площадь: ${recQty} м²`;
                 } else if (add.id === 'frame_upgrade' || add.id === 'frame_kamera_dry' || add.id === 'ceiling_osb_12_lath'
-                           || add.id === 'antiseptic_lag' || add.id === 'floor_tongue_28_add' || add.id === 'floor_board_35_150_add'
-                           || add.id === 'roof_metal' || add.id === 'roof_proflist_low' || add.id === 'roof_proflist_high') {
+                           || add.id === 'antiseptic_lag' || add.id === 'floor_tongue_28_add' || add.id === 'floor_board_35_150_add') {
                     recQty = Math.ceil(area + getVerandaArea());
                     recText = `Площадь: ${recQty} м²`;
                 } else {
@@ -2049,6 +2057,37 @@
             activeAdditionFilter = btn.getAttribute('data-filter');
             renderAdditions();
         });
+    });
+
+    // Search box for additions (name filter), injected next to the filter tabs
+    let additionSearchQuery = '';
+    const searchWrap = document.createElement('div');
+    searchWrap.style.cssText = 'position:relative; display:inline-flex; align-items:center; margin-left:auto;';
+    searchWrap.innerHTML = `
+        <input type="text" id="additionSearchInput" placeholder="Поиск по названию..."
+            style="padding:6px 28px 6px 10px; border:1px solid var(--border-color, #ccc); border-radius:8px; font-size:13px; min-width:180px;">
+        <span id="additionSearchClear" title="Очистить"
+            style="position:absolute; right:8px; cursor:pointer; color:var(--text-muted, #888); font-size:14px; line-height:1; display:none;">✕</span>
+    `;
+    additionFilters.style.display = 'flex';
+    additionFilters.style.flexWrap = 'wrap';
+    additionFilters.style.alignItems = 'center';
+    additionFilters.appendChild(searchWrap);
+
+    const additionSearchInput = searchWrap.querySelector('#additionSearchInput');
+    const additionSearchClear = searchWrap.querySelector('#additionSearchClear');
+
+    additionSearchInput.addEventListener('input', (e) => {
+        additionSearchQuery = e.target.value.trim().toLowerCase();
+        additionSearchClear.style.display = additionSearchQuery ? 'inline' : 'none';
+        renderAdditions();
+    });
+
+    additionSearchClear.addEventListener('click', () => {
+        additionSearchQuery = '';
+        additionSearchInput.value = '';
+        additionSearchClear.style.display = 'none';
+        renderAdditions();
     });
 
     // Sharing and Clipboard Copy actions
