@@ -1821,6 +1821,7 @@
         el.addEventListener('change', (e) => {
             state[el.id] = e.target.value;
             calculateBill();
+            renderAdditions();
         });
     });
 
