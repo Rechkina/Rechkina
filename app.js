@@ -65,7 +65,7 @@
         { id: "roof_metal", name: "Кровля: Металлочерепица (+1500 р/м²)", price: 1500, type: "area", quantity: 0 },
         { id: "roof_proflist_low", name: "Кровля: Профлист С8 цветной низкая крыша (+500 р/м²)", price: 500, type: "area", quantity: 0 },
         { id: "roof_proflist_high", name: "Кровля: Профлист С8 цветной высокая крыша (+750 р/м²)", price: 750, type: "area", quantity: 0 },
-        { id: "frame_upgrade", name: "Замена каркаса 50/100 на 50/150 без утепления (+2000 р/м²)", price: 2000, type: "area", quantity: 0 },
+        { id: "frame_upgrade", name: "Замена каркаса 50/100 на 50/150 без утепления", price: 2000, type: "area", quantity: 0 },
         { id: "vent_gap", name: "Вентзазор (периметр * 2000 р)", price: 2000, type: "area", quantity: 0 },
         { id: "roof_overhangs", name: "Свесы на кровле до 30 см (периметр * 1200 р)", price: 1200, type: "area", quantity: 0 },
 
@@ -897,7 +897,7 @@
             }
 
             const qty = state.additionQuantities[add.id] || 0;
-            const price = add.price || 0;
+            const price = (add.id === 'frame_upgrade') ? getFrameUpgradePrice() : (add.price || 0);
             
             let recQty = 0;
             let recText = '';
@@ -976,6 +976,9 @@
                 } else if (nameLower.includes('периметр') || nameLower.includes('вентзазор') || nameLower.includes('свес') || nameLower.includes('обвязк')) {
                     recQty = Math.ceil(calcPerimeter);
                     recText = `Периметр: ${recQty} м`;
+                } else if (add.id === 'frame_upgrade') {
+                    recQty = Math.ceil(area + getVerandaArea());
+                    recText = `Площадь: ${recQty} м²`;
                 } else {
                     recQty = Math.ceil(area);
                     recText = `Площадь: ${recQty} м²`;
@@ -1037,6 +1040,27 @@
         if (additionsList.children.length === 0) {
             additionsList.innerHTML = `<div style="color:var(--text-muted); text-align:center; padding: 15px;">Нет подходящих опций в этой категории.</div>`;
         }
+    }
+
+    // Veranda area for houses is entered directly in m² via the addition input
+    // (veranda_high / veranda_low), unlike cabins where it's depth * length.
+    function getVerandaArea() {
+        if (state.calculatorMode !== 'custom') return 0;
+        if (state.customType === 'house_high') return state.additionQuantities['veranda_high'] || 0;
+        if (state.customType === 'house_low') return state.additionQuantities['veranda_low'] || 0;
+        return 0;
+    }
+
+    // Frame upgrade (50/100 -> 50/150) is 2500 р/м² for houses (high or low roof)
+    // without any insulation selected, and 2000 р/м² otherwise.
+    function getFrameUpgradePrice() {
+        if (state.calculatorMode === 'custom') {
+            const isHouseNoIns =
+                (state.customType === 'house_high' && state.selCustomInsulation === 'cold') ||
+                (state.customType === 'house_low' && state.selCustomInsulation === '0');
+            if (isHouseNoIns) return 2500;
+        }
+        return 2000;
     }
 
     // 5. Calculation Core Engine
@@ -1152,22 +1176,13 @@
             }
 
             // Insulation Upgrade
-            // Veranda area for houses is entered directly in m² via the addition input
-            // (veranda_high / veranda_low), unlike cabins where it's depth * length.
-            let verandaAreaForIns = 0;
-            if (state.customType === 'house_high') {
-                verandaAreaForIns = state.additionQuantities['veranda_high'] || 0;
-            } else if (state.customType === 'house_low') {
-                verandaAreaForIns = state.additionQuantities['veranda_low'] || 0;
-            }
-
             if (state.selCustomInsulation === '100') {
                 const insArea = (state.customWidth * 2 * 2.5) + (state.customLength * 2 * 2.5) + area + area;
                 insulationSum = insArea * (customRates.rate_ins_100 || 300);
             } else if (state.selCustomInsulation === '100_min_wool') {
                 insulationSum = area * (customRates.rate_ins_100_min_wool || 550);
             } else if (state.selCustomInsulation === '150') {
-                insulationSum = (area + verandaAreaForIns) * 3500;
+                insulationSum = (area + getVerandaArea()) * 3500;
             } else if (state.selCustomInsulation === '200_ceiling') {
                 insulationSum = area * (customRates.rate_ins_200_ceiling || 1000);
             } else if (state.selCustomInsulation === '200_floor') {
@@ -1315,7 +1330,8 @@
         model.additions.forEach(add => {
             const qty = state.additionQuantities[add.id] || 0;
             if (qty > 0) {
-                let total = qty * add.price;
+                const effectivePrice = (add.id === 'frame_upgrade') ? getFrameUpgradePrice() : add.price;
+                let total = qty * effectivePrice;
                 // Veranda: qty = depth (м)
                 // For cabin/hozblok (veranda_cabin), veranda is along the length.
                 // (For houses, the veranda is calculated directly in square meters without multipliers).
@@ -1331,15 +1347,15 @@
                             dimensionVal = isHouseVeranda ? sz.width : sz.length;
                         }
                     }
-                    total = qty * dimensionVal * add.price;
+                    total = qty * dimensionVal * effectivePrice;
                 } else if (add.id === 'pile_delivery') {
-                    total = Math.max(5000, qty * add.price);
+                    total = Math.max(5000, qty * effectivePrice);
                 }
                 additionsSum += total;
                 selectedAdditionsText.push({
                     name: add.name,
                     qty: qty,
-                    price: add.price,
+                    price: effectivePrice,
                     total: total
                 });
             }
