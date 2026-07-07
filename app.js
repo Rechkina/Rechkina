@@ -65,7 +65,7 @@
         { id: "roof_metal", name: "Кровля: Металлочерепица (+1500 р/м²)", price: 1500, type: "area", quantity: 0 },
         { id: "roof_proflist_low", name: "Кровля: Профлист С8 цветной низкая крыша (+500 р/м²)", price: 500, type: "area", quantity: 0 },
         { id: "roof_proflist_high", name: "Кровля: Профлист С8 цветной высокая крыша (+750 р/м²)", price: 750, type: "area", quantity: 0 },
-        { id: "frame_upgrade", name: "Замена каркаса 50/100 на 50/150 без утепления", price: 2000, type: "area", quantity: 0 },
+        { id: "frame_upgrade", name: "Замена каркаса 50/100 на 50/150", price: 2000, type: "area", quantity: 0 },
         { id: "vent_gap", name: "Вентзазор (периметр * 2000 р)", price: 2000, type: "area", quantity: 0 },
         { id: "roof_overhangs", name: "Свесы на кровле до 30 см (периметр * 1200 р)", price: 1200, type: "area", quantity: 0 },
 
@@ -1013,6 +1013,7 @@
                 state.additionQuantities[add.id] = newVal;
                 input.value = newVal;
                 calculateBill();
+                renderAdditions();
             };
 
             input.addEventListener('change', (e) => {
