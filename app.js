@@ -92,7 +92,8 @@
 
         { id: "generator_daily", name: "Генератор (сутки)", price: 2500, type: "quantity", quantity: 0 },
         { id: "material_carry", name: "Пронос материала свыше 20 м (за каждые 10 м)", price: 5000, type: "quantity", quantity: 0 },
-        { id: "long_ladder", name: "Лестница на всю длину", price: 20000, type: "quantity", quantity: 0 }
+        { id: "long_ladder", name: "Лестница на всю длину", price: 20000, type: "quantity", quantity: 0 },
+        { id: "extension_room", name: "Пристройка", price: 20000, type: "quantity", quantity: 0 }
     ];
 
     let activeConfig = [];
@@ -905,6 +906,11 @@
                 'win_lux_180_190_po2', 'win_lux_180_200_po2'
             ];
             if (NEW_2CHAMBER_WINDOW_IDS.includes(add.id)) {
+                if (!isHouse) return;
+            }
+
+            // Extension (Пристройка) is only for houses (high or low roof)
+            if (add.id === 'extension_room') {
                 if (!isHouse) return;
             }
 
