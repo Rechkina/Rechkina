@@ -879,6 +879,21 @@
                 if (!isHouse) return;
             }
 
+            // Frame upgrade (50/100 -> 50/150) is only relevant without insulation
+            if (add.id === 'frame_upgrade') {
+                if (state.calculatorMode === 'custom') {
+                    const hasInsulation =
+                        (state.customType === 'house_high' && state.selCustomInsulation !== 'cold') ||
+                        (state.customType === 'house_low' && state.selCustomInsulation !== '0');
+                    if (isHouse && hasInsulation) {
+                        if (state.additionQuantities[add.id]) {
+                            state.additionQuantities[add.id] = 0;
+                        }
+                        return;
+                    }
+                }
+            }
+
             // Apply filtering logic
             if (activeAdditionFilter !== 'all') {
                 const nameLower = add.name.toLowerCase();
@@ -952,8 +967,8 @@
                     newVal = Math.max(0, newVal);
                     state.additionQuantities[add.id] = newVal;
                     input.value = newVal;
-                    calculateBill();
                     renderAdditions(); // re-render to update area hint
+                    calculateBill();
                 };
 
                 input.addEventListener('change', (e) => { updateQty(parseInt(e.target.value) || 0); });
@@ -1016,8 +1031,8 @@
                 newVal = Math.max(0, newVal);
                 state.additionQuantities[add.id] = newVal;
                 input.value = newVal;
-                calculateBill();
                 renderAdditions();
+                calculateBill();
             };
 
             input.addEventListener('change', (e) => {
@@ -1825,8 +1840,8 @@
     [selCustomExterior, selCustomInterior, selCustomFloor, selCustomInsulation].forEach(el => {
         el.addEventListener('change', (e) => {
             state[el.id] = e.target.value;
-            calculateBill();
             renderAdditions();
+            calculateBill();
         });
     });
 
