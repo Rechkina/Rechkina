@@ -985,13 +985,17 @@
                 }
             }
 
+            const displayName = (add.id === 'frame_upgrade')
+                ? `${add.name} (+${price.toLocaleString('ru-RU')} р/м²)`
+                : add.name;
+
             const applyLink = recText ? ` <a href="#" class="apply-rec-btn" data-val="${recQty}" style="font-size:11px; color:var(--primary); text-decoration:underline; margin-left:8px; cursor:pointer;" title="Подставить площадь/периметр в количество">${recText}</a>` : '';
 
             const row = document.createElement('div');
             row.className = 'option-row';
             row.innerHTML = `
                 <div class="option-info" style="max-width: 65%;">
-                    <span class="option-label">${add.name} ${applyLink}</span>
+                    <span class="option-label">${displayName} ${applyLink}</span>
                 </div>
                 <div style="display:flex; align-items:center; gap: 15px;">
                     <div class="option-price">${price.toLocaleString('ru-RU')} р.</div>
