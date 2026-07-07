@@ -21,6 +21,21 @@
         { id: "win_lux_150_190_po", name: "Окно ПВХ 1-камерный 150х190 поворотно-откидное", price: 25000, type: "quantity", quantity: 0 },
         { id: "win_lux_180_190_po", name: "Окно ПВХ 1-камерный 180х190 поворотно-откидное", price: 26000, type: "quantity", quantity: 0 },
         { id: "win_lux_180_200_po", name: "Окно ПВХ 1-камерный 180х200 поворотно-откидное", price: 30000, type: "quantity", quantity: 0 },
+
+        { id: "win_lux_60_90_po2", name: "Окно ПВХ 60х90 (2 камеры) поворотно-откидное", price: 10500, type: "quantity", quantity: 0 },
+        { id: "win_lux_60_120_po2", name: "Окно ПВХ 60х120 (2 камеры) поворотно-откидное", price: 13000, type: "quantity", quantity: 0 },
+        { id: "win_lux_60_180_po2", name: "Окно ПВХ 60х180 (2 камеры) поворотно-откидное", price: 15000, type: "quantity", quantity: 0 },
+        { id: "win_lux_100_100_po2", name: "Окно ПВХ 100х100 (2 камеры) поворотно-откидное", price: 12000, type: "quantity", quantity: 0 },
+        { id: "win_lux_120_120_po2", name: "Окно ПВХ 120х120 (2 камеры) поворотно-откидное", price: 16000, type: "quantity", quantity: 0 },
+        { id: "win_lux_100_140_po2", name: "Окно ПВХ 100х140 (2 камеры) поворотно-откидное", price: 17000, type: "quantity", quantity: 0 },
+        { id: "win_lux_100_150_po2", name: "Окно ПВХ 100х150 (2 камеры) поворотно-откидное", price: 18000, type: "quantity", quantity: 0 },
+        { id: "win_lux_120_150_po2", name: "Окно ПВХ 120х150 (2 камеры) поворотно-откидное", price: 19500, type: "quantity", quantity: 0 },
+        { id: "win_lux_140_150_po2", name: "Окно ПВХ 140х150 (2 камеры) поворотно-откидное", price: 20000, type: "quantity", quantity: 0 },
+        { id: "win_lux_150_150_po2", name: "Окно ПВХ 150х150 (2 камеры) поворотно-откидное", price: 20500, type: "quantity", quantity: 0 },
+        { id: "win_lux_150_100_po2", name: "Окно ПВХ 150х100 (2 камеры) поворотно-откидное", price: 21000, type: "quantity", quantity: 0 },
+        { id: "win_lux_150_190_po2", name: "Окно ПВХ 150х190 (2 камеры) поворотно-откидное", price: 28000, type: "quantity", quantity: 0 },
+        { id: "win_lux_180_190_po2", name: "Окно ПВХ 180х190 (2 камеры) поворотно-откидное", price: 29000, type: "quantity", quantity: 0 },
+        { id: "win_lux_180_200_po2", name: "Окно ПВХ 180х200 (2 камеры) поворотно-откидное", price: 33000, type: "quantity", quantity: 0 },
  
         { id: "pile_76_1500", name: "Свая винтовая 76/1500", price: 3550, type: "quantity", quantity: 0 },
         { id: "pile_76_2000", name: "Свая винтовая 76/2000", price: 3700, type: "quantity", quantity: 0 },
@@ -878,6 +893,18 @@
 
             // Vent gap only for houses
             if (add.id === 'vent_gap') {
+                if (!isHouse) return;
+            }
+
+            // New 2-chamber windows are only available for houses (high or low roof)
+            const NEW_2CHAMBER_WINDOW_IDS = [
+                'win_lux_60_90_po2', 'win_lux_60_120_po2', 'win_lux_60_180_po2',
+                'win_lux_100_100_po2', 'win_lux_120_120_po2', 'win_lux_100_140_po2',
+                'win_lux_100_150_po2', 'win_lux_120_150_po2', 'win_lux_140_150_po2',
+                'win_lux_150_150_po2', 'win_lux_150_100_po2', 'win_lux_150_190_po2',
+                'win_lux_180_190_po2', 'win_lux_180_200_po2'
+            ];
+            if (NEW_2CHAMBER_WINDOW_IDS.includes(add.id)) {
                 if (!isHouse) return;
             }
 
