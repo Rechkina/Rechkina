@@ -957,8 +957,11 @@
             }
 
             // Text search filter (by name)
-            if (additionSearchQuery && !add.name.toLowerCase().includes(additionSearchQuery)) {
-                return;
+            if (additionSearchQuery) {
+                const nameLowerForSearch = add.name.toLowerCase();
+                const searchWords = additionSearchQuery.split(/\s+/).filter(Boolean);
+                const matchesAll = searchWords.every(w => nameLowerForSearch.includes(w));
+                if (!matchesAll) return;
             }
 
             const qty = state.additionQuantities[add.id] || 0;
