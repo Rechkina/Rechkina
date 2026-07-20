@@ -1,4 +1,4 @@
-## Hi there 👋
+## Мне нужна ваша рабочая почта, можете ее здесь указать?
 
 <!--
 **Rechkina/Rechkina** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
