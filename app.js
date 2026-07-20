@@ -858,107 +858,13 @@
         }
 
         model.additions.forEach(add => {
-            // Determine context flags
-            const isHouseHigh = (state.calculatorMode === 'custom' && state.customType === 'house_high') ||
-                                 (state.calculatorMode === 'standard' && model.name.includes("Дачный дом") && isHighRoof());
-            const isHouseLow = (state.calculatorMode === 'custom' && state.customType === 'house_low') ||
-                                (state.calculatorMode === 'standard' && model.name.includes("Дачный дом") && !isHighRoof());
-            const isHouse = isHouseHigh || isHouseLow;
-            const isCabinOrHoz = (state.calculatorMode === 'custom' && (state.customType === 'cabin' || state.customType === 'hozblok')) ||
-                                  (state.calculatorMode === 'standard' && (model.name.includes("Бытовка") || model.name.includes("Хозблок")));
-
-            // Veranda filtering — show only the right variant
-            if (add.id === 'veranda_high') { if (!isHouseHigh) return; }
-            if (add.id === 'veranda_low')  { if (!isHouseLow)  return; }
-            if (add.id === 'veranda_cabin') { if (!isCabinOrHoz) return; }
-
-            // Filter out double-pitch and veranda ceiling additions for all houses
-            if (isHouse) {
-                if (add.id === 'roof_double_pitch_1800' || add.id === 'roof_double_pitch_flat' || add.id === 'veranda_ceiling_board') {
-                    return;
+            // Единая проверка: если позиция не применима для текущего выбора — обнуляем
+            // сохранённое количество (чтобы оно не "всплыло" в итоге при переключении) и скрываем строку.
+            if (!isAdditionApplicable(add, model)) {
+                if (state.additionQuantities[add.id]) {
+                    state.additionQuantities[add.id] = 0;
                 }
-                // Filter proflist based on roof height for houses
-                if (isHighRoof()) {
-                    if (add.id === 'roof_proflist_low') return;
-                } else {
-                    if (add.id === 'roof_proflist_high') return;
-                }
-            }
-
-            // Filter out double-pitch flat for hozbloks
-            if (add.id === 'roof_double_pitch_flat') {
-                if (state.customType === 'hozblok') return;
-                if (state.calculatorMode === 'standard' && model.name.includes("Хозблок")) return;
-            }
-
-            // Filter out 200mm insulation for hozbloks and standard cabins/hozbloks
-            if (add.id === 'ins_basalt_ceiling_200' || add.id === 'ins_basalt_floor_200') {
-                if (state.customType === 'hozblok') return;
-                if (state.calculatorMode === 'standard' && (model.name.includes("Бытовка") || model.name.includes("Хозблок"))) return;
-            }
-
-            // Filter out veranda ceiling board for standard cabins
-            if (add.id === 'veranda_ceiling_board') {
-                if (state.calculatorMode === 'standard' && model.name.includes("Бытовка")) return;
-            }
-
-            // Filter out door in roof end — only for high roof houses
-            if (add.id === 'roof_end_door') {
-                const isHighRoofHouse = (state.calculatorMode === 'custom' && state.customType === 'house_high') ||
-                                        (state.calculatorMode === 'standard' && model.name.includes("Дачный дом") && state.houseTypeHeight === 3.5);
-                if (!isHighRoofHouse) return;
-            }
-
-            // Vent gap only for houses
-            if (add.id === 'vent_gap') {
-                if (!isHouse) return;
-            }
-
-            // New 2-chamber windows are only available for houses (high or low roof)
-            const NEW_2CHAMBER_WINDOW_IDS = [
-                'win_lux_60_90_po2', 'win_lux_60_120_po2', 'win_lux_60_180_po2',
-                'win_lux_100_100_po2', 'win_lux_120_120_po2', 'win_lux_100_140_po2',
-                'win_lux_100_150_po2', 'win_lux_120_150_po2', 'win_lux_140_150_po2',
-                'win_lux_150_150_po2', 'win_lux_150_100_po2', 'win_lux_150_190_po2',
-                'win_lux_180_190_po2', 'win_lux_180_200_po2'
-            ];
-            if (NEW_2CHAMBER_WINDOW_IDS.includes(add.id)) {
-                if (!isHouse) return;
-            }
-
-            // Extension (Пристройка) is only for houses (high or low roof)
-            if (add.id === 'extension_room') {
-                if (!isHouse) return;
-            }
-
-            // Frame kiln-dried lumber option is only for houses (high/low roof)
-            if (add.id === 'frame_kamera_dry') {
-                if (!isHouse) return;
-            }
-
-            // Ceiling OSB decking with lathing is only for high roof houses
-            if (add.id === 'ceiling_osb_12_lath') {
-                if (!isHouseHigh) return;
-            }
-
-            // Wall height raise is only for houses (high/low roof)
-            if (add.id === 'wall_height_raise_20') {
-                if (!isHouse) return;
-            }
-
-
-            if (add.id === 'frame_upgrade') {
-                if (state.calculatorMode === 'custom') {
-                    const hasInsulation =
-                        (state.customType === 'house_high' && state.selCustomInsulation !== 'cold') ||
-                        (state.customType === 'house_low' && state.selCustomInsulation !== '0');
-                    if (isHouse && hasInsulation) {
-                        if (state.additionQuantities[add.id]) {
-                            state.additionQuantities[add.id] = 0;
-                        }
-                        return;
-                    }
-                }
+                return;
             }
 
             // Apply filtering logic
@@ -1065,7 +971,12 @@
 
             if (add.type === 'area') {
                 const nameLower = add.name.toLowerCase();
-                if (nameLower.includes('стена') || nameLower.includes('стен')) {
+                if (add.id === 'wall_height_raise_20') {
+                    // Явно проверяем ID раньше, чем общее совпадение по слову "стен" —
+                    // иначе попадает в ветку "площадь стен" (периметр×высота) вместо площади дома.
+                    recQty = Math.ceil(area);
+                    recText = `Площадь: ${recQty} м²`;
+                } else if (nameLower.includes('стена') || nameLower.includes('стен')) {
                     const height = (state.calculatorMode === 'custom') ? state.customHeight : ((model.name.includes("Дачный дом \"Каркасный\"")) ? state.houseTypeHeight : 2.2);
                     recQty = Math.ceil(calcPerimeter * height);
                     recText = `Стены: ${recQty} м²`;
@@ -1180,6 +1091,79 @@
             if (state.selCustomInsulation === 'frame_200_hk') return 1400;
         }
         return 700;
+    }
+
+    // Единая проверка применимости доп.опции для текущего выбора (тип дома/бытовки, утепление, крыша и т.д.).
+    // Используется и при отрисовке списка допов, и при расчёте суммы — чтобы скрытая позиция
+    // никогда не попадала в итог, даже если у неё осталось сохранённое количество от другого выбора.
+    function isAdditionApplicable(add, model) {
+        const isHouseHigh = (state.calculatorMode === 'custom' && state.customType === 'house_high') ||
+                             (state.calculatorMode === 'standard' && model.name.includes("Дачный дом") && isHighRoof());
+        const isHouseLow = (state.calculatorMode === 'custom' && state.customType === 'house_low') ||
+                            (state.calculatorMode === 'standard' && model.name.includes("Дачный дом") && !isHighRoof());
+        const isHouse = isHouseHigh || isHouseLow;
+        const isCabinOrHoz = (state.calculatorMode === 'custom' && (state.customType === 'cabin' || state.customType === 'hozblok')) ||
+                              (state.calculatorMode === 'standard' && (model.name.includes("Бытовка") || model.name.includes("Хозблок")));
+
+        if (add.id === 'veranda_high') return isHouseHigh;
+        if (add.id === 'veranda_low') return isHouseLow;
+        if (add.id === 'veranda_cabin') return isCabinOrHoz;
+
+        if (isHouse) {
+            if (add.id === 'roof_double_pitch_1800' || add.id === 'roof_double_pitch_flat' || add.id === 'veranda_ceiling_board') {
+                return false;
+            }
+            if (isHighRoof()) {
+                if (add.id === 'roof_proflist_low') return false;
+            } else {
+                if (add.id === 'roof_proflist_high') return false;
+            }
+        }
+
+        if (add.id === 'roof_double_pitch_flat') {
+            if (state.customType === 'hozblok') return false;
+            if (state.calculatorMode === 'standard' && model.name.includes("Хозблок")) return false;
+        }
+
+        if (add.id === 'ins_basalt_ceiling_200' || add.id === 'ins_basalt_floor_200') {
+            if (state.customType === 'hozblok') return false;
+            if (state.calculatorMode === 'standard' && (model.name.includes("Бытовка") || model.name.includes("Хозблок"))) return false;
+        }
+
+        if (add.id === 'veranda_ceiling_board') {
+            if (state.calculatorMode === 'standard' && model.name.includes("Бытовка")) return false;
+        }
+
+        if (add.id === 'roof_end_door') {
+            const isHighRoofHouse = (state.calculatorMode === 'custom' && state.customType === 'house_high') ||
+                                    (state.calculatorMode === 'standard' && model.name.includes("Дачный дом") && state.houseTypeHeight === 3.5);
+            if (!isHighRoofHouse) return false;
+        }
+
+        if (add.id === 'vent_gap' && !isHouse) return false;
+
+        const NEW_2CHAMBER_WINDOW_IDS = [
+            'win_lux_60_90_po2', 'win_lux_60_120_po2', 'win_lux_60_180_po2',
+            'win_lux_100_100_po2', 'win_lux_120_120_po2', 'win_lux_100_140_po2',
+            'win_lux_100_150_po2', 'win_lux_120_150_po2', 'win_lux_140_150_po2',
+            'win_lux_150_150_po2', 'win_lux_150_100_po2', 'win_lux_150_190_po2',
+            'win_lux_180_190_po2', 'win_lux_180_200_po2'
+        ];
+        if (NEW_2CHAMBER_WINDOW_IDS.includes(add.id) && !isHouse) return false;
+
+        if (add.id === 'extension_room' && !isHouse) return false;
+        if (add.id === 'frame_kamera_dry' && !isHouse) return false;
+        if (add.id === 'ceiling_osb_12_lath' && !isHouseHigh) return false;
+        if (add.id === 'wall_height_raise_20' && !isHouse) return false;
+
+        if (add.id === 'frame_upgrade' && state.calculatorMode === 'custom') {
+            const hasInsulation =
+                (state.customType === 'house_high' && state.selCustomInsulation !== 'cold') ||
+                (state.customType === 'house_low' && state.selCustomInsulation !== '0');
+            if (isHouse && hasInsulation) return false;
+        }
+
+        return true;
     }
 
     // 5. Calculation Core Engine
@@ -1472,6 +1456,14 @@
         let additionsSum = 0;
         const selectedAdditionsText = [];
         model.additions.forEach(add => {
+            // Скрытая для текущего выбора позиция никогда не должна попадать в сумму,
+            // даже если у неё осталось сохранённое количество от другого выбора (например, другого типа дома).
+            if (!isAdditionApplicable(add, model)) {
+                if (state.additionQuantities[add.id]) {
+                    state.additionQuantities[add.id] = 0;
+                }
+                return;
+            }
             const qty = state.additionQuantities[add.id] || 0;
             if (qty > 0) {
                 const isVerandaHouseAddon = (add.id === 'veranda_high' || add.id === 'veranda_low');
