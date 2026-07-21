@@ -252,6 +252,17 @@
     
     // Custom Constructor DOM
     const customTypeSelector = document.getElementById('customTypeSelector');
+    // Подписи на карточках категорий в разметке устарели — обновляем текст под актуальные тарифы.
+    if (customTypeSelector) {
+        const houseHighCard = customTypeSelector.querySelector('[data-type="house_high"] .sub');
+        if (houseHighCard) {
+            houseHighCard.textContent = '12 500 / 13 000 р/м²';
+        }
+        const houseLowCard = customTypeSelector.querySelector('[data-type="house_low"] .sub');
+        if (houseLowCard) {
+            houseLowCard.textContent = '10 000 р/м²';
+        }
+    }
     const customLengthSlider = document.getElementById('customLengthSlider');
     const lblCustomLength = document.getElementById('lblCustomLength');
     const customWidthSlider = document.getElementById('customWidthSlider');
