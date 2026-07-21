@@ -61,16 +61,16 @@
         { id: "door_panel_6", name: "Дверь филенчатая деревянная (6 000 р)", price: 6000, type: "quantity", quantity: 0 },
         { id: "door_pvc_35", name: "Дверь входная ПВХ (35 000 р)", price: 35000, type: "quantity", quantity: 0 },
         { id: "door_wood_double", name: "Дверь деревянная распашная 1.4х1.9 м", price: 3000, type: "quantity", quantity: 0 },
-        { id: "ramp", name: "Пандус", price: 2000, type: "quantity", quantity: 0 },
-        { id: "antiseptic_lag", name: "Антисептик лаг, обрешетки (за м²)", price: 350, type: "area", quantity: 0 },
-        { id: "rodent_mesh", name: "Сетка от грызунов", price: 600, type: "area", quantity: 0 },
         { id: "antiseptic_bottom", name: "Антисептик дна", price: 500, type: "area", quantity: 0 },
+        { id: "rodent_mesh", name: "Сетка от грызунов", price: 600, type: "area", quantity: 0 },
         { id: "block_20_20_40", name: "Блок 20х20х40", price: 500, type: "quantity", quantity: 0 },
         { id: "ramp_2m", name: "Пандус (до 2 м)", price: 5000, type: "quantity", quantity: 0 },
  
         { id: "floor_tongue_28_add", name: "Пол: Шпунтованная доска 28 мм (за м²)", price: 1000, type: "area", quantity: 0 },
         { id: "floor_osb_12_add", name: "Пол: ОСБ 12 мм (за м²)", price: 500, type: "area", quantity: 0 },
-        { id: "floor_osb_18_add", name: "Пол: ОСБ 18 мм (за м²)", price: 700, type: "area", quantity: 0 },
+        { id: "floor_osb_15_add", name: "Пол: ОСБ 15 мм (за м²)", price: 700, type: "area", quantity: 0 },
+        { id: "floor_osb_18_add", name: "Пол: ОСБ 18 мм (за м²)", price: 800, type: "area", quantity: 0 },
+        { id: "floor_tongue_35_add", name: "Пол: Шпунтованная доска 35 мм (за м²)", price: 1300, type: "area", quantity: 0 },
         { id: "floor_board_35_150_add", name: "Пол: Доска обрезная 35х150 мм (за м²)", price: 500, type: "area", quantity: 0 },
  
         { id: "ins_basalt_ceiling_200", name: "Утепление: 200 мм базальтовая плита потолка (за м²)", price: 1000, type: "area", quantity: 0 },
@@ -473,7 +473,7 @@
                 <option value="frame_100_kd">Каркас 50/100 "камерная сушка" ХК, без утепления (+2 000 р/м² к цене без утепления)</option>
                 <option value="frame_150_kd">Каркас 50/150 "камерная сушка" ХК, без утепления (+4 500 р/м² к цене без утепления, с верандой)</option>
                 <option value="frame_200_kd">Каркас 50/200 "камерная сушка" ХК, без утепления (+6 000 р/м² к цене без утепления, с верандой)</option>
-                <option value="kd_100_real">Каркас 50/100 "камерная сушка" + утепление 100мм баз. плита (по формуле)</option>
+                <option value="kd_100_real">Каркас 50/100 "камерная сушка" + утепление 100мм баз. плита (по формуле + 2 000 р/м² каркас, с верандой)</option>
                 <option value="kd_150_real">Каркас 50/150 "камерная сушка" + утепление 150мм баз. плита (+5 700 р/м², с верандой)</option>
                 <option value="kd_200_real">Каркас 50/200 "камерная сушка" + утепление 200мм баз. плита (+7 600 р/м², с верандой)</option>
             `;
@@ -502,7 +502,7 @@
                 <option value="frame_100_kd">Каркас 50/100 "камерная сушка" ХК, без утепления (10 500 р/м², веранда 10 000 р/м²)</option>
                 <option value="frame_150_kd">Каркас 50/150 "камерная сушка" ХК, без утепления (13 000 р/м², с верандой)</option>
                 <option value="frame_200_kd">Каркас 50/200 "камерная сушка" ХК, без утепления (14 500 р/м², с верандой)</option>
-                <option value="kd_100_real">Каркас 50/100 "камерная сушка" + утепление 100мм баз. плита (по формуле)</option>
+                <option value="kd_100_real">Каркас 50/100 "камерная сушка" + утепление 100мм баз. плита (по формуле + 2 000 р/м² каркас, с верандой)</option>
                 <option value="kd_150_real">Каркас 50/150 "камерная сушка" + утепление 150мм баз. плита (+5 700 р/м², с верандой)</option>
                 <option value="kd_200_real">Каркас 50/200 "камерная сушка" + утепление 200мм баз. плита (+7 600 р/м², с верандой)</option>
             `;
@@ -988,7 +988,7 @@
                 if (add.id === 'wall_height_raise_20') {
                     // Явно проверяем ID раньше, чем общее совпадение по слову "стен" —
                     // иначе попадает в ветку "площадь стен" (периметр×высота) вместо площади дома.
-                    recQty = Math.ceil(area);
+                    recQty = Math.ceil(area + getVerandaArea());
                     recText = `Площадь: ${recQty} м²`;
                 } else if (nameLower.includes('стена') || nameLower.includes('стен')) {
                     const height = (state.calculatorMode === 'custom') ? state.customHeight : ((model.name.includes("Дачный дом \"Каркасный\"")) ? state.houseTypeHeight : 2.2);
@@ -1002,7 +1002,7 @@
                     recQty = Math.ceil(area + getVerandaArea() + porchArea);
                     recText = `Площадь: ${recQty} м²`;
                 } else if (add.id === 'frame_upgrade' || add.id === 'ceiling_osb_12_lath'
-                           || add.id === 'antiseptic_lag' || add.id === 'floor_tongue_28_add' || add.id === 'floor_board_35_150_add'
+                           || add.id === 'floor_tongue_28_add' || add.id === 'floor_board_35_150_add' || add.id === 'floor_tongue_35_add'
                            || add.id === 'rodent_mesh' || add.id === 'antiseptic_bottom') {
                     recQty = Math.ceil(area + getVerandaArea());
                     recText = `Площадь: ${recQty} м²`;
@@ -1335,9 +1335,13 @@
             }
 
             // Insulation Upgrade
-            if (state.selCustomInsulation === '100' || state.selCustomInsulation === 'kd_100_real') {
+            if (state.selCustomInsulation === '100') {
                 const insArea = (state.customWidth * 2 * 2.5) + (state.customLength * 2 * 2.5) + area + area;
                 insulationSum = insArea * (customRates.rate_ins_100 || 450);
+            } else if (state.selCustomInsulation === 'kd_100_real') {
+                const insArea = (state.customWidth * 2 * 2.5) + (state.customLength * 2 * 2.5) + area + area;
+                // Утепление по обычной формуле + надбавка за каркас "камерная сушка" (+2000 р/м² от площади дома+веранды)
+                insulationSum = insArea * (customRates.rate_ins_100 || 450) + 2000 * (area + getVerandaArea());
             } else if (state.selCustomInsulation === '100_min_wool') {
                 insulationSum = area * (customRates.rate_ins_100_min_wool || 550);
             } else if (state.selCustomInsulation === '150') {
