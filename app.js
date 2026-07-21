@@ -85,7 +85,6 @@
         { id: "roof_proflist_low", name: "Кровля: Профлист С8 цветной низкая крыша (+500 р/м²)", price: 500, type: "area", quantity: 0 },
         { id: "roof_proflist_high", name: "Кровля: Профлист С8 цветной (выбор) или ондулин высокая крыша (+750 р/м²)", price: 750, type: "area", quantity: 0 },
         { id: "frame_upgrade", name: "Замена каркаса 50/100 на 50/150", price: 2000, type: "area", quantity: 0 },
-        { id: "frame_kamera_dry", name: "Каркас \"камерная\" сушка (+5 500 р/м²)", price: 5500, type: "area", quantity: 0 },
         { id: "ceiling_osb_12_lath", name: "Настил на потолок ОСБ 12 мм с обрешеткой (+1 800 р/м²)", price: 1800, type: "area", quantity: 0 },
         { id: "vent_gap", name: "Вентзазор (периметр * 2000 р)", price: 2000, type: "area", quantity: 0 },
         { id: "roof_overhangs", name: "Свесы на кровле +10 см (периметр * 1000 р)", price: 1000, type: "area", quantity: 0 },
@@ -471,6 +470,12 @@
                 <option value="cold">Каркас 50/100 ХК, без утепления (10 500 р/м²)</option>
                 <option value="frame_150_hk">Каркас 50/150 ХК, без утепления (13 000 р/м², с верандой)</option>
                 <option value="frame_200_hk">Каркас 50/200 ХК, без утепления (14 500 р/м², с верандой)</option>
+                <option value="frame_100_kd">Каркас 50/100 "камерная сушка" ХК, без утепления (12 500 р/м², веранда 11 500 р/м²)</option>
+                <option value="frame_150_kd">Каркас 50/150 "камерная сушка" ХК, без утепления (15 000 р/м², с верандой)</option>
+                <option value="frame_200_kd">Каркас 50/200 "камерная сушка" ХК, без утепления (16 500 р/м², с верандой)</option>
+                <option value="kd_100_real">Каркас 50/100 "камерная сушка" + утепление 100мм баз. плита (по формуле)</option>
+                <option value="kd_150_real">Каркас 50/150 "камерная сушка" + утепление 150мм баз. плита (+5 700 р/м², с верандой)</option>
+                <option value="kd_200_real">Каркас 50/200 "камерная сушка" + утепление 200мм баз. плита (+7 600 р/м², с верандой)</option>
             `;
         } else if (type === 'cabin') {
             insHTML = `
@@ -494,6 +499,12 @@
                 <option value="0">Каркас 50/100 ХК, без утепления (8 500 р/м²)</option>
                 <option value="frame_150_hk">Каркас 50/150 ХК, без утепления (11 000 р/м², с верандой)</option>
                 <option value="frame_200_hk">Каркас 50/200 ХК, без утепления (12 500 р/м², с верандой)</option>
+                <option value="frame_100_kd">Каркас 50/100 "камерная сушка" ХК, без утепления (10 500 р/м², веранда 10 000 р/м²)</option>
+                <option value="frame_150_kd">Каркас 50/150 "камерная сушка" ХК, без утепления (13 000 р/м², с верандой)</option>
+                <option value="frame_200_kd">Каркас 50/200 "камерная сушка" ХК, без утепления (14 500 р/м², с верандой)</option>
+                <option value="kd_100_real">Каркас 50/100 "камерная сушка" + утепление 100мм баз. плита (по формуле)</option>
+                <option value="kd_150_real">Каркас 50/150 "камерная сушка" + утепление 150мм баз. плита (+5 700 р/м², с верандой)</option>
+                <option value="kd_200_real">Каркас 50/200 "камерная сушка" + утепление 200мм баз. плита (+7 600 р/м², с верандой)</option>
             `;
         }
         
@@ -895,8 +906,11 @@
             const qty = state.additionQuantities[add.id] || 0;
             const isVerandaHouseAddonDisp = (add.id === 'veranda_high' || add.id === 'veranda_low');
             const verandaIncludedInFrameDisp = isVerandaHouseAddonDisp && state.calculatorMode === 'custom' &&
-                (state.selCustomInsulation === 'frame_150_hk' || state.selCustomInsulation === 'frame_200_hk');
+                ['frame_150_hk', 'frame_200_hk', 'frame_150_kd', 'frame_200_kd', 'kd_150_real', 'kd_200_real'].includes(state.selCustomInsulation);
+            const verandaKilnSurchargeDisp = isVerandaHouseAddonDisp && state.calculatorMode === 'custom' &&
+                state.selCustomInsulation === 'frame_100_kd';
             const price = verandaIncludedInFrameDisp ? 0
+                : verandaKilnSurchargeDisp ? (add.price || 0) + 2000
                 : (add.id === 'frame_upgrade') ? getFrameUpgradePrice()
                 : (add.id === 'wall_height_raise_20') ? getWallHeightRaisePrice()
                 : (add.price || 0);
@@ -987,7 +1001,7 @@
                     const porchArea = state.additionQuantities['freestanding_porch'] || 0;
                     recQty = Math.ceil(area + getVerandaArea() + porchArea);
                     recText = `Площадь: ${recQty} м²`;
-                } else if (add.id === 'frame_upgrade' || add.id === 'frame_kamera_dry' || add.id === 'ceiling_osb_12_lath'
+                } else if (add.id === 'frame_upgrade' || add.id === 'ceiling_osb_12_lath'
                            || add.id === 'antiseptic_lag' || add.id === 'floor_tongue_28_add' || add.id === 'floor_board_35_150_add'
                            || add.id === 'rodent_mesh' || add.id === 'antiseptic_bottom') {
                     recQty = Math.ceil(area + getVerandaArea());
@@ -1076,8 +1090,8 @@
     function getFrameUpgradePrice() {
         if (state.calculatorMode === 'custom') {
             const isHouseNoIns =
-                (state.customType === 'house_high' && state.selCustomInsulation === 'cold') ||
-                (state.customType === 'house_low' && state.selCustomInsulation === '0');
+                (state.customType === 'house_high' && (state.selCustomInsulation === 'cold' || state.selCustomInsulation === 'frame_100_kd')) ||
+                (state.customType === 'house_low' && (state.selCustomInsulation === '0' || state.selCustomInsulation === 'frame_100_kd'));
             if (isHouseNoIns) return 2500;
         }
         return 2000;
@@ -1087,8 +1101,8 @@
     // (50/100 ХК = 700, 50/150 ХК = 1000, 50/200 ХК = 1400 р/м²; для остальных вариантов утепления — 700 р/м² по умолчанию)
     function getWallHeightRaisePrice() {
         if (state.calculatorMode === 'custom' && (state.customType === 'house_high' || state.customType === 'house_low')) {
-            if (state.selCustomInsulation === 'frame_150_hk') return 1000;
-            if (state.selCustomInsulation === 'frame_200_hk') return 1400;
+            if (['frame_150_hk', 'frame_150_kd', 'kd_150_real'].includes(state.selCustomInsulation)) return 1000;
+            if (['frame_200_hk', 'frame_200_kd', 'kd_200_real'].includes(state.selCustomInsulation)) return 1400;
         }
         return 700;
     }
@@ -1152,14 +1166,15 @@
         if (NEW_2CHAMBER_WINDOW_IDS.includes(add.id) && !isHouse) return false;
 
         if (add.id === 'extension_room' && !isHouse) return false;
-        if (add.id === 'frame_kamera_dry' && !isHouse) return false;
         if (add.id === 'ceiling_osb_12_lath' && !isHouseHigh) return false;
         if (add.id === 'wall_height_raise_20' && !isHouse) return false;
 
         if (add.id === 'frame_upgrade' && state.calculatorMode === 'custom') {
+            const isFrame50_100 = state.selCustomInsulation === 'cold' || state.selCustomInsulation === '0' ||
+                state.selCustomInsulation === 'frame_100_kd';
             const hasInsulation =
-                (state.customType === 'house_high' && state.selCustomInsulation !== 'cold') ||
-                (state.customType === 'house_low' && state.selCustomInsulation !== '0');
+                (state.customType === 'house_high' && !isFrame50_100) ||
+                (state.customType === 'house_low' && !isFrame50_100);
             if (isHouse && hasInsulation) return false;
         }
 
@@ -1199,6 +1214,8 @@
             if (state.customType === 'house_low') {
                 if (state.selCustomInsulation === '0') {
                     baseRate = 8500;
+                } else if (state.selCustomInsulation === 'frame_100_kd') {
+                    baseRate = 10500; // Каркас 50/100 "камерная сушка" ХК = 8500 + 2000
                 } else if (state.selCustomExterior === 'none') {
                     // Наружная: Вагонка ВС (базовая) => 10000 р/м², независимо от внутренней (ОСБ 9мм или Вагонка ВС — одинаково)
                     baseRate = customRates.rate_house_low_lining || 10000;
@@ -1208,6 +1225,8 @@
             } else if (state.customType === 'house_high') {
                 if (state.selCustomInsulation === 'cold') {
                     baseRate = 10500;
+                } else if (state.selCustomInsulation === 'frame_100_kd') {
+                    baseRate = 12500; // Каркас 50/100 "камерная сушка" ХК = 10500 + 2000
                 } else if (state.selCustomExterior === 'imitation_a') {
                     // Наружная: Имитация бруса 'В' + внутренняя: Вагонка ВС => 13000 р/м²
                     baseRate = 13000;
@@ -1219,14 +1238,20 @@
                 baseRate = customRates[`rate_${state.customType}`] || 8000;
             }
 
-            // Каркас 50/150 ХК и 50/200 ХК: цена уже общая (дом + веранда), веранду отдельно не оплачиваем
+            // Каркас 50/150 / 50/200 ХК (обычный и "камерная сушка"): цена уже общая (дом + веранда), веранду отдельно не оплачиваем
+            const COMBINED_FRAME_OPTIONS = ['frame_150_hk', 'frame_200_hk', 'frame_150_kd', 'frame_200_kd'];
             const frameIncludesVeranda = (state.customType === 'house_high' || state.customType === 'house_low') &&
-                (state.selCustomInsulation === 'frame_150_hk' || state.selCustomInsulation === 'frame_200_hk');
+                COMBINED_FRAME_OPTIONS.includes(state.selCustomInsulation);
             if (state.customType === 'house_low' || state.customType === 'house_high') {
+                const isHigh = state.customType === 'house_high';
                 if (state.selCustomInsulation === 'frame_150_hk') {
-                    baseRate = (state.customType === 'house_high') ? 13000 : 11000;
+                    baseRate = isHigh ? 13000 : 11000;
                 } else if (state.selCustomInsulation === 'frame_200_hk') {
-                    baseRate = (state.customType === 'house_high') ? 14500 : 12500;
+                    baseRate = isHigh ? 14500 : 12500;
+                } else if (state.selCustomInsulation === 'frame_150_kd') {
+                    baseRate = isHigh ? 15000 : 13000; // (10500 или 8500) + 4500
+                } else if (state.selCustomInsulation === 'frame_200_kd') {
+                    baseRate = isHigh ? 16500 : 14500; // (10500 или 8500) + 6000
                 }
             }
             const baseArea = frameIncludesVeranda ? (area + getVerandaArea()) : area;
@@ -1298,7 +1323,7 @@
             }
 
             // Insulation Upgrade
-            if (state.selCustomInsulation === '100') {
+            if (state.selCustomInsulation === '100' || state.selCustomInsulation === 'kd_100_real') {
                 const insArea = (state.customWidth * 2 * 2.5) + (state.customLength * 2 * 2.5) + area + area;
                 insulationSum = insArea * (customRates.rate_ins_100 || 450);
             } else if (state.selCustomInsulation === '100_min_wool') {
@@ -1307,6 +1332,10 @@
                 insulationSum = (area + getVerandaArea()) * 3700;
             } else if (state.selCustomInsulation === '200') {
                 insulationSum = (area + getVerandaArea()) * 5600;
+            } else if (state.selCustomInsulation === 'kd_150_real') {
+                insulationSum = (area + getVerandaArea()) * 5700; // 1200 (баз. утепление) + 4500 (надбавка камерной сушки)
+            } else if (state.selCustomInsulation === 'kd_200_real') {
+                insulationSum = (area + getVerandaArea()) * 7600; // 1600 (баз. утепление) + 6000 (надбавка камерной сушки)
             } else if (state.selCustomInsulation === 'mix_100') {
                 // Утепление MIX: каркас 50/100, баз. плита стены + мин. вата пол/потолок — 450 р/м² площади стен
                 const wallAreaMix = (state.customWidth * 2 * 2.5) + (state.customLength * 2 * 2.5);
@@ -1468,8 +1497,11 @@
             if (qty > 0) {
                 const isVerandaHouseAddon = (add.id === 'veranda_high' || add.id === 'veranda_low');
                 const verandaIncludedInFrame = isVerandaHouseAddon && state.calculatorMode === 'custom' &&
-                    (state.selCustomInsulation === 'frame_150_hk' || state.selCustomInsulation === 'frame_200_hk');
+                    ['frame_150_hk', 'frame_200_hk', 'frame_150_kd', 'frame_200_kd', 'kd_150_real', 'kd_200_real'].includes(state.selCustomInsulation);
+                const verandaKilnSurcharge = isVerandaHouseAddon && state.calculatorMode === 'custom' &&
+                    state.selCustomInsulation === 'frame_100_kd';
                 const effectivePrice = verandaIncludedInFrame ? 0
+                    : verandaKilnSurcharge ? add.price + 2000
                     : (add.id === 'frame_upgrade') ? getFrameUpgradePrice()
                     : (add.id === 'wall_height_raise_20') ? getWallHeightRaisePrice()
                     : add.price;
