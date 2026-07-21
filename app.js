@@ -467,12 +467,12 @@
                 <option value="150">150 мм базальтовая плита (+3 700 р/м²)</option>
                 <option value="200">200 мм базальтовая плита (+5 600 р/м²)</option>
                 <option value="mix_100">Утепление MIX: каркас 50/100 (баз. плита стены + мин. вата пол/потолок)</option>
-                <option value="cold">Каркас 50/100 ХК, без утепления (10 500 р/м²)</option>
-                <option value="frame_150_hk">Каркас 50/150 ХК, без утепления (13 000 р/м², с верандой)</option>
-                <option value="frame_200_hk">Каркас 50/200 ХК, без утепления (14 500 р/м², с верандой)</option>
-                <option value="frame_100_kd">Каркас 50/100 "камерная сушка" ХК, без утепления (12 500 р/м², веранда 11 500 р/м²)</option>
-                <option value="frame_150_kd">Каркас 50/150 "камерная сушка" ХК, без утепления (15 000 р/м², с верандой)</option>
-                <option value="frame_200_kd">Каркас 50/200 "камерная сушка" ХК, без утепления (16 500 р/м², с верандой)</option>
+                <option value="cold">Каркас 50/100 ХК, без утепления (9 500 р/м² Вагонка ВС / 10 000 р/м² Имитация В)</option>
+                <option value="frame_150_hk">Каркас 50/150 ХК, без утепления (+2 500 р/м² к цене без утепления, с верандой)</option>
+                <option value="frame_200_hk">Каркас 50/200 ХК, без утепления (+4 000 р/м² к цене без утепления, с верандой)</option>
+                <option value="frame_100_kd">Каркас 50/100 "камерная сушка" ХК, без утепления (+2 000 р/м² к цене без утепления)</option>
+                <option value="frame_150_kd">Каркас 50/150 "камерная сушка" ХК, без утепления (+4 500 р/м² к цене без утепления, с верандой)</option>
+                <option value="frame_200_kd">Каркас 50/200 "камерная сушка" ХК, без утепления (+6 000 р/м² к цене без утепления, с верандой)</option>
                 <option value="kd_100_real">Каркас 50/100 "камерная сушка" + утепление 100мм баз. плита (по формуле)</option>
                 <option value="kd_150_real">Каркас 50/150 "камерная сушка" + утепление 150мм баз. плита (+5 700 р/м², с верандой)</option>
                 <option value="kd_200_real">Каркас 50/200 "камерная сушка" + утепление 200мм баз. плита (+7 600 р/м², с верандой)</option>
@@ -1223,10 +1223,20 @@
                     baseRate = customRates.rate_house_low_osb || 9500;
                 }
             } else if (state.customType === 'house_high') {
+                // Без утепления (база для всех каркасных ХК-вариантов): Вагонка ВС => 9500, Имитация В => 10000
+                const noInsBaseHigh = (state.selCustomExterior === 'imitation_a') ? 10000 : 9500;
                 if (state.selCustomInsulation === 'cold') {
-                    baseRate = 10500;
+                    baseRate = noInsBaseHigh;
                 } else if (state.selCustomInsulation === 'frame_100_kd') {
-                    baseRate = 12500; // Каркас 50/100 "камерная сушка" ХК = 10500 + 2000
+                    baseRate = noInsBaseHigh + 2000; // камерная сушка = база без утепления + 2000
+                } else if (state.selCustomInsulation === 'frame_150_hk') {
+                    baseRate = noInsBaseHigh + 2500;
+                } else if (state.selCustomInsulation === 'frame_200_hk') {
+                    baseRate = noInsBaseHigh + 4000;
+                } else if (state.selCustomInsulation === 'frame_150_kd') {
+                    baseRate = noInsBaseHigh + 4500;
+                } else if (state.selCustomInsulation === 'frame_200_kd') {
+                    baseRate = noInsBaseHigh + 6000;
                 } else if (state.selCustomExterior === 'imitation_a') {
                     // Наружная: Имитация бруса 'В' + внутренняя: Вагонка ВС => 13000 р/м²
                     baseRate = 13000;
@@ -1242,16 +1252,18 @@
             const COMBINED_FRAME_OPTIONS = ['frame_150_hk', 'frame_200_hk', 'frame_150_kd', 'frame_200_kd'];
             const frameIncludesVeranda = (state.customType === 'house_high' || state.customType === 'house_low') &&
                 COMBINED_FRAME_OPTIONS.includes(state.selCustomInsulation);
-            if (state.customType === 'house_low' || state.customType === 'house_high') {
-                const isHigh = state.customType === 'house_high';
+            // Для дома низкого эти ставки фиксированные (не зависят от отделки — заказчик подтвердил,
+            // что в низких домах только одна позиция). Для дома высокого ставки уже посчитаны выше
+            // с учётом наружной отделки (Вагонка ВС / Имитация В).
+            if (state.customType === 'house_low') {
                 if (state.selCustomInsulation === 'frame_150_hk') {
-                    baseRate = isHigh ? 13000 : 11000;
+                    baseRate = 11000;
                 } else if (state.selCustomInsulation === 'frame_200_hk') {
-                    baseRate = isHigh ? 14500 : 12500;
+                    baseRate = 12500;
                 } else if (state.selCustomInsulation === 'frame_150_kd') {
-                    baseRate = isHigh ? 15000 : 13000; // (10500 или 8500) + 4500
+                    baseRate = 13000; // 8500 + 4500
                 } else if (state.selCustomInsulation === 'frame_200_kd') {
-                    baseRate = isHigh ? 16500 : 14500; // (10500 или 8500) + 6000
+                    baseRate = 14500; // 8500 + 6000
                 }
             }
             const baseArea = frameIncludesVeranda ? (area + getVerandaArea()) : area;
